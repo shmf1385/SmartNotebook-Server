@@ -2,4 +2,4 @@ venv
 db.sqlite3
 core/settings.py
 **/migrations/
-**/__pycache/
+**/__pycache__/
