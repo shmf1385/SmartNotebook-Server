@@ -11,11 +11,13 @@ def newNote(request):
         try:
             if request.POST['token'] and request.POST['title'] and request.POST['username'] and request.POST['content']:
                 pass
+            else:
+                return JsonResponse({"Status": "ERR_A_ARG_IS_EMPTY"})
         except MultiValueDictKeyError:
             return JsonResponse({"Status": "ERR_LOW_ARGS"})
         userCheck = User.objects.filter(username=request.POST['username'])
         if userCheck:
-            if Token.objects.filter(user=user[0], token=request.POST['token']):
+            if Token.objects.filter(user=userCheck[0], token=request.POST['token']):
                 if not Note.objects.filter(title=request.POST['title']):
                     Note.objects.create(
                         title = request.POST['title'],
