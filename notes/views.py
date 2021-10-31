@@ -1,31 +1,32 @@
-from django.http.response import JsonResponse 
-from .models import Note
+from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.http.response import JsonResponse
 from django.contrib.auth.models import User
-from django.utils.datastructures import MultiValueDictKeyError
-from users.models import Token
+from django.views import View
+from .models import Note
 
-@csrf_exempt
-def newNote(request):
-    if request.method == "POST":
-        try:
-            if request.POST['token'] and request.POST['title'] and request.POST['username'] and request.POST['content']:
-                pass
-            else:
-                return JsonResponse({"Status": "ERR_A_ARG_IS_EMPTY"})
-        except MultiValueDictKeyError:
-            return JsonResponse({"Status": "ERR_LOW_ARGS"})
-        userCheck = User.objects.filter(username=request.POST['username'])
-        if userCheck:
-            if Token.objects.filter(user=userCheck[0], token=request.POST['token']):
-                if not Note.objects.filter(title=request.POST['title']):
+
+@method_decorator(csrf_exempt, name="dispatch")
+class newNote(View):
+
+    def get(self, request):
+        return JsonResponse({"Status": "ERR_REQUEST_TYPE_IS_GET"})
+
+    def post(self, request):
+        username = request.POST.get('username')
+        token = request.POST.get('token')
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        if username and token and content:
+            user = get_object_or_404(User, token__token=token)
+            if user:
+                if not Note.objects.filter(title=title):
                     Note.objects.create(
-                        title = request.POST['title'],
-                        user = User.objects.filter(username=request.POST['username'])[0],
-                        content = request.POST['title']
+                        title = title,
+                        user = user,
+                        content = content,
                     )
                     return JsonResponse({"Status": "FILE_CREATED"})
-                return JsonResponse({"Status": "ERR_FILENAME"})
-            return JsonResponse({"Status": "ERR_TOKEN"})
-        return JsonResponse({"Status": "ERR_USERNAME"})
-    return JsonResponse({"Status": "ERR_REQUEST_TYPE_IS_GET"})
+                return JsonResponse({"Status": "ERR_TITLE_EXISTS"})
+        return JsonResponse({"Status": "Bad Args"})
