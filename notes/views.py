@@ -29,4 +29,4 @@ class newNote(View):
                     )
                     return JsonResponse({"Status": "FILE_CREATED"})
                 return JsonResponse({"Status": "ERR_TITLE_EXISTS"})
-        return JsonResponse({"Status": "ERR_TO_LOW_ARGS"})
+        return JsonResponse({"Status": "ERR_LOW_ARGS"})
