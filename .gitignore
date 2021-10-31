@@ -1,6 +1,5 @@
 venv
 **/settings.py
-db.sqlite3
 **/migrations/
 **/__pycache__/
 **/my.cnf
