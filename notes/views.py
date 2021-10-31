@@ -29,8 +29,4 @@ class newNote(View):
                     )
                     return JsonResponse({"Status": "FILE_CREATED"})
                 return JsonResponse({"Status": "ERR_TITLE_EXISTS"})
-<<<<<<< HEAD
         return JsonResponse({"Status": "ERR_LOW_ARGS"})
-=======
-        return JsonResponse({"Status": "ERR_TO_LOW_ARGS"})
->>>>>>> 6005c0f5589c92bcefae2ca2bf13fcd607e51622
