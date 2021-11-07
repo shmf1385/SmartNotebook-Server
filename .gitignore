@@ -3,3 +3,4 @@ venv
 **/migrations/
 **/__pycache__/
 **/my.cnf
+.idea
