@@ -24,7 +24,7 @@
                     </div>
                 {% endfor %}
             {% endif %}
-            <form method="POST" action="/users/signup/">
+            <form method="POST" action="/users/signup/">{% csrf_token %}
                 <input class="form-control mb-4" name="email" placeholder="ایمیل">
                 <input class="form-control mb-4" name="username" placeholder="نام کاربری">
                 <input class="form-control mb-4" name="password" placeholder="رمز عبور" type="password">

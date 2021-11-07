@@ -16,7 +16,6 @@ from secrets import token_hex
 from django.contrib import messages
 
 
-@method_decorator(csrf_exempt, name="dispatch")
 class signupView(View):
 
     def get(self, request):
