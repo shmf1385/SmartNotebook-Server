@@ -1,6 +1,7 @@
 from django.urls import path
-from . import views
+from .views import newNote, editNote
 
 urlpatterns = [
-    path('new/', views.newNote.as_view(), name="newNote")
+    path('new/', newNote.as_view(), name="newNote"),
+    path('edit/', editNote.as_view(), name="editView")
 ]
