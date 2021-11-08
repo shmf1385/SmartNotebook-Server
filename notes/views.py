@@ -56,3 +56,26 @@ class editNote(View):
                     return JsonResponse({"Status": "NOTE_EDITED"})
         return JsonResponse({"Status": "ERR_ARGS"})
                     
+
+@method_decorator(csrf_exempt, name="dispatch")
+class deleteNote(View):
+
+    def get(self, request):
+        return JsonResponse({"Status": "ERR_REQUEST_TYPE_IS_GET"})
+
+    def post(self, request):
+        username = request.POST.get('username')
+        token = request.POST.get('token')
+        pk = request.POST.get('pk')
+        if username and token and pk:
+            user = get_object_or_404(User, token__token=token)
+            if user:
+                note = get_object_or_404(
+                    Note,
+                    pk = pk,
+                    user = user
+                )
+                if note:
+                    note.delete()
+                    return JsonResponse({"Status": "NOTE_DELETED"})
+        return JsonResponse({"Status": "ERR_ARGS"})
