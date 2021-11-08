@@ -51,7 +51,6 @@ class signupView(View):
     def get(self, request):
         code = request.GET.get('code')
         if code:
-            print('hello')
             temp_user = get_object_or_404(TempSignupCode, code=code)
             user = User.objects.create(
                 username = temp_user.username,
@@ -69,10 +68,9 @@ class signupView(View):
         username = request.POST.get('username')
         email = request.POST.get('email')
         password = request.POST.get('password')
-        code = request.POST.get('code')
         if username and email and password:
-            userCheck = User.objects.filter(username=username).exists()
-            if userCheck:
+            usernameCheck = User.objects.filter(username=username).exists()
+            if usernameCheck:
                 messages.add_message(request, messages.WARNING, 'نام کاربری وارد شده قبلا توسط فردی دیگر استفاده شده است لطفا دوباره تلاش نکنید')
                 return render(request, 'signup.html', {'alertType': "danger"})
             emailCheck = User.objects.filter(email=email).exists()
