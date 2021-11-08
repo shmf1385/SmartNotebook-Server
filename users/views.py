@@ -15,6 +15,36 @@ from django.views.generic.base import View
 from secrets import token_hex
 from django.contrib import messages
 
+@method_decorator(csrf_exempt, name="dispatch")
+class loginView(View):
+
+    def get(self, request):
+        return JsonResponse({"Stauts": "ERR_REQUEST_TYPE_IS_GET"})
+    
+    def post(self, request):
+        email = request.POST.get("email")
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        if email and password:
+            userCheck = get_object_or_404(
+                User,
+                email = email,
+                password = password
+            )
+            if userCheck:
+                token = Token.objects.get(user=userCheck)
+                return JsonResponse({"Status": "SUCCESSED", "TOKEN": token.token})
+        elif username and password:
+            userCheck = get_object_or_404(
+                User,
+                username = username,
+                password = password
+            )
+            if userCheck:
+                token = Token.objects.get(user=userCheck)
+                return JsonResponse({"Status": "SUCCESSED", "TOKEN": token.token})
+        return JsonResponse({"Status": "ERR_TOO_LOW_ARGS"})
+
 
 class signupView(View):
 
