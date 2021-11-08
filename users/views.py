@@ -96,11 +96,7 @@ def send_verification_email(email, code):
     message["From"] = settings.SENDER_EMAIL
     message["To"] = settings.SENDER_EMAIL_PASSWORD
 
-    text = """\
-    Hi,
-    How are you?
-    Real Python has many great tutorials:
-    www.realpython.com"""
+    text = "لینک تایید ثبت نام شما برای دفترچه یادداشت هوشمند"
     html = f"""\
     <html>
     <body>
