@@ -15,6 +15,7 @@ from django.views.generic.base import View
 from secrets import token_hex
 from django.contrib import messages
 
+
 @method_decorator(csrf_exempt, name="dispatch")
 class loginView(View):
 
@@ -89,6 +90,22 @@ class signupView(View):
             )
             send_verification_email(email, tempcode)
             return render(request, 'mailSended.html')        
+
+@method_decorator(csrf_exempt, name="dispatch")
+class checkToken(View):
+
+    def get(self, request):
+        return JsonResponse({"Status": "ERR_REQUEST_TYPE_IS_GET"})
+    
+    def post(self, request):
+        username = request.POST.get('username')
+        token = request.POST.get('token')
+        if username and token:
+            user = User.objects.filter(username=username, token__token=token)
+            if user:
+                return JsonResponse({"Status": "USERANME_AND_TOKEN_IS_CORRECT"})
+            return JsonResponse({"Status": "USERNAME_OR_TOKEN_IS_INCORRCET"})
+        return JsonResponse({"Status": "ERR_ARGS"})
 
 def send_verification_email(email, code):
     message = MIMEMultipart("alternative")
