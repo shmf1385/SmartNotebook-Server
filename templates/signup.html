@@ -25,9 +25,18 @@
                 {% endfor %}
             {% endif %}
             <form method="POST" action="/users/signup/">{% csrf_token %}
-                <input class="form-control mb-4" name="email" placeholder="ایمیل">
-                <input class="form-control mb-4" name="username" placeholder="نام کاربری">
-                <input class="form-control mb-4" name="password" placeholder="رمز عبور" type="password">
+              <div class="form-floating mb-3">
+                <input class="form-control mb-4" name="email" placeholder="ایمیل" required>
+                <label>ایمیل</label>
+              </div>
+              <div class="form-floating mb-3">
+                <input class="form-control mb-4" name="username" placeholder="نام کاربری" required>
+                <label>نام کاربری</label>
+              </div>
+              <div class="form-floating mb-3">
+                <input class="form-control mb-4" name="password" placeholder="رمز عبور" type="password" required>
+                <label>رمز عبور</label>
+              </div>
                 <button class="btn btn-primary mb-4" type="submit">ثبت نام</button>
             </form>
         </div>
