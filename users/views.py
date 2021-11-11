@@ -58,7 +58,13 @@ class signupView(View):
                 email = temp_user.email,
                 password = temp_user.password
             )
-            token = token_hex(24)
+
+            loop = True
+            while loop:
+                token = token_hex(24)
+                if not Token.objects.filter(token=token):
+                    loop = False
+                continue
             Token.objects.create(user=user, token=token)
             temp_user.delete()
             return render(request, 'userCreated.html')
