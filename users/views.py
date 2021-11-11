@@ -1,20 +1,20 @@
 from django.http.response import JsonResponse
-from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.models import User
-from django.utils.decorators import method_decorator
-from django.conf import settings
-from django.views.decorators.csrf import csrf_exempt
-import re
-import smtplib
-import ssl
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from .models import Token, TempSignupCode, UserDevice
 from django.views.generic.base import View
-from secrets import token_hex
 from django.contrib import messages
 from datetime import datetime
 from django.utils import timezone
+from django.conf import settings
+from django.shortcuts import get_object_or_404, render
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from secrets import token_hex
+import re
+import smtplib
+import ssl
+from .models import Token, TempSignupCode, UserDevice
 
 
 @method_decorator(csrf_exempt, name="dispatch")
