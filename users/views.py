@@ -130,7 +130,7 @@ class checkToken(View):
 
 def send_verification_email(email, code):
     message = MIMEMultipart("alternative")
-    message["Subject"] = "multipart test"
+    message["Subject"] = "ثبت نام در دفترچه یادداشت هوشمند"
     message["From"] = settings.SENDER_EMAIL
     message["To"] = settings.SENDER_EMAIL_PASSWORD
 
