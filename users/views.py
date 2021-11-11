@@ -1,5 +1,4 @@
-from django.http import request
-from django.http.response import HttpResponse, JsonResponse
+from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
@@ -10,10 +9,12 @@ import smtplib
 import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from .models import Token, TempSignupCode
+from .models import Token, TempSignupCode, UserDevice
 from django.views.generic.base import View
 from secrets import token_hex
 from django.contrib import messages
+from datetime import datetime
+from django.utils import timezone
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -26,25 +27,39 @@ class loginView(View):
         email = request.POST.get("email")
         username = request.POST.get("username")
         password = request.POST.get("password")
-        if email and password:
+        deviceName = request.POST.get("deviceName")
+        ip = request.POST.get("ip")
+        if email and password and deviceName and ip:
             userCheck = get_object_or_404(
                 User,
                 email = email,
                 password = password
             )
-            if userCheck:
-                token = Token.objects.get(user=userCheck)
-                return JsonResponse({"Status": "SUCCESSED", "TOKEN": token.token})
-        elif username and password:
+        elif username and password and deviceName and ip:
             userCheck = get_object_or_404(
                 User,
                 username = username,
                 password = password
             )
-            if userCheck:
-                token = Token.objects.get(user=userCheck)
-                return JsonResponse({"Status": "SUCCESSED", "TOKEN": token.token})
-        return JsonResponse({"Status": "ERR_TOO_LOW_ARGS"})
+        else:
+            return JsonResponse({"Status": "ERR_ARGS"})
+        if userCheck:
+            token = Token.objects.get(user=userCheck)
+            deviceNameCheck = UserDevice.objects.filter(user = userCheck, device_name = deviceName)
+            if not deviceNameCheck:
+                now = datetime.now()
+                UserDevice.objects.create(
+                    user=userCheck,
+                    device_name = deviceName,
+                    ip = ip,
+                    last_login = now,
+                    first_login = now,
+                    )
+            else:
+                now = timezone.now()
+                deviceNameCheck[0].last_login = now
+                deviceNameCheck[0].save()
+            return JsonResponse({"Status": "SUCCESSED", "TOKEN": token.token})
 
 
 class signupView(View):
@@ -95,7 +110,7 @@ class signupView(View):
                 password = password
             )
             send_verification_email(email, tempcode)
-            return render(request, 'mailSended.html')        
+            return render(request, 'mailSended.html')
 
 @method_decorator(csrf_exempt, name="dispatch")
 class checkToken(View):
