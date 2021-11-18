@@ -2,7 +2,6 @@ from django.http.response import JsonResponse
 from django.contrib.auth.models import User
 from django.views.generic.base import View
 from django.contrib import messages
-from datetime import datetime
 from django.utils import timezone
 from django.conf import settings
 from django.shortcuts import get_object_or_404, render
@@ -31,26 +30,24 @@ class loginView(View):
         deviceName = request.POST.get("deviceName")
         ip = request.POST.get("ip")
         if email and password and deviceName and ip:
-            userCheck = get_object_or_404(
-                User,
+            userCheck = User.objects.filter(
                 email = email,
                 password = password
             )
         elif username and password and deviceName and ip:
-            userCheck = get_object_or_404(
-                User,
+            userCheck = User.objects.filter(
                 username = username,
                 password = password
             )
         else:
             return JsonResponse({"Status": "ERR_ARGS"})
         if userCheck:
-            token = Token.objects.get(user=userCheck)
-            deviceNameCheck = UserDevice.objects.filter(user = userCheck, device_name = deviceName)
+            token = Token.objects.get(user=userCheck[0])
+            deviceNameCheck = UserDevice.objects.filter(user = userCheck[0], device_name = deviceName)
             if not deviceNameCheck:
                 now = timezone.now()
                 UserDevice.objects.create(
-                    user=userCheck,
+                    user=userCheck[0],
                     device_name = deviceName,
                     ip = ip,
                     last_login = now,
@@ -61,6 +58,7 @@ class loginView(View):
                 deviceNameCheck[0].last_login = now
                 deviceNameCheck[0].save()
             return JsonResponse({"Status": "SUCCESSED", "TOKEN": token.token})
+        return JsonResponse({"Status": "AUTHENTICATION_FAILED"})
 
 
 class signupView(View):
@@ -110,7 +108,7 @@ class signupView(View):
                 email = email,
                 password = password
             )
-            send_verification_email(email, tempcode)
+            send_verification_email(email, tempcode, request.build_absolute_uri())
             return render(request, 'mailSended.html')
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -154,7 +152,7 @@ class checkTokenView(View):
             return JsonResponse({"Status": "USERNAME_OR_TOKEN_IS_INCORRCET"})
         return JsonResponse({"Status": "ERR_ARGS"})
 
-def send_verification_email(email, code):
+def send_verification_email(email, code, absolute_uri):
     message = MIMEMultipart("alternative")
     message["Subject"] = "ثبت نام در دفترچه یادداشت هوشمند"
     message["From"] = settings.SENDER_EMAIL
@@ -164,7 +162,7 @@ def send_verification_email(email, code):
     html = f"""\
     <html>
     <body>
-        <a href="http://localhost:8000/users/signup/?code={code}">ثبت نام</a>
+        <a href="{absolute_uri}?code={code}">ثبت نام</a>
     </body>
     </html>
     """
