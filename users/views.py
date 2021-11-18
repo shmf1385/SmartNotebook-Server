@@ -15,6 +15,7 @@ import re
 import smtplib
 import ssl
 from .models import Token, TempSignupCode, UserDevice
+from notes.models import Note
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -47,7 +48,7 @@ class loginView(View):
             token = Token.objects.get(user=userCheck)
             deviceNameCheck = UserDevice.objects.filter(user = userCheck, device_name = deviceName)
             if not deviceNameCheck:
-                now = datetime.now()
+                now = timezone.now()
                 UserDevice.objects.create(
                     user=userCheck,
                     device_name = deviceName,
@@ -113,7 +114,32 @@ class signupView(View):
             return render(request, 'mailSended.html')
 
 @method_decorator(csrf_exempt, name="dispatch")
-class checkToken(View):
+class deleteUserView(View):
+
+    def get(self, request):
+        return JsonResponse({"Status": "ERR_REQUEST_TYPE_IS_GET"})
+
+    def post(self, request):
+        username = request.POST.get("username")
+        token = request.POST.get("token")
+        if username and token:
+            userCheck = User.objects.filter(username=username, token__token=token)
+            if userCheck:
+                userCheck[0].delete()
+                userNotes = Note.objects.filter(user=userCheck[0])
+                if userNotes:
+                    for note in userNotes:
+                        note.delete()
+                userDeviceses = UserDevice.objects.filter(user=userCheck[0])
+                if userDeviceses:
+                    for device in userDeviceses:
+                        device.delete()
+                return JsonResponse({"Status": "SUCCESSED"})
+            return JsonResponse({"Status": "AUTHENTICATION_FAILED"})
+        return JsonResponse({"Status": "ERR_ARGS"})
+
+@method_decorator(csrf_exempt, name="dispatch")
+class checkTokenView(View):
 
     def get(self, request):
         return JsonResponse({"Status": "ERR_REQUEST_TYPE_IS_GET"})
