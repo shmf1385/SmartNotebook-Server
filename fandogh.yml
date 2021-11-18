@@ -1,0 +1,12 @@
+kind: ExternalService
+name: hafez
+spec:
+  image_pull_policy: Always
+  port: 80
+  source:
+    context: .
+    media_path: ''
+    project_type: django
+    python_version: '3.7'
+    static_path: static
+    wsgi: core.wsgi
