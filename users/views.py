@@ -90,26 +90,33 @@ class signupView(View):
         email = request.POST.get('email')
         password = request.POST.get('password')
         if username and email and password:
-            usernameCheck = User.objects.filter(username=username).exists()
-            if usernameCheck:
-                messages.add_message(request, messages.WARNING, 'نام کاربری وارد شده قبلا توسط فردی دیگر استفاده شده است لطفا دوباره تلاش نکنید')
+            if validateUsername(username):
+                if validateEmail(email):
+                    usernameCheck = User.objects.filter(username=username).exists()
+                    if usernameCheck:
+                        messages.add_message(request, messages.WARNING, 'نام کاربری وارد شده قبلا توسط فردی دیگر استفاده شده است لطفا دوباره تلاش نکنید')
+                        return render(request, 'signup.html', {'alertType': "danger"})
+                    emailCheck = User.objects.filter(email=email).exists()
+                    if emailCheck:
+                        messages.add_message(request, messages.WARNING, 'ایمیل وارد شده قبلا توسط فردی دیگر استفاده شده است لطفا دوباره تلاش نکنید')
+                        return render(request, 'signup.html', {'alertType': "danger"})
+                    if len(password) < 8:
+                        messages.add_message(request, messages.WARNING, 'طول رمز عبور حداقل ۸ کاراکتر است')
+                        return render(request, 'signup.html', {'alertType': "danger"})
+                    tempcode = token_hex(24)
+                    TempSignupCode.objects.create(
+                        code = tempcode,
+                        username = username,
+                        email = email,
+                        password = password
+                    )
+                    send_verification_email(email, tempcode, request.build_absolute_uri())
+                    return render(request, 'mailSended.html')
+                messages.add_message(request, messages.WARNING, 'ایمیل وارد شده معتبر نمی باشد')
                 return render(request, 'signup.html', {'alertType': "danger"})
-            emailCheck = User.objects.filter(email=email).exists()
-            if emailCheck:
-                messages.add_message(request, messages.WARNING, 'ایمیل وارد شده قبلا توسط فردی دیگر استفاده شده است لطفا دوباره تلاش نکنید')
-                return render(request, 'signup.html', {'alertType': "danger"})
-            if len(password) < 8:
-                messages.add_message(request, messages.WARNING, 'طول رمز عبور حداقل ۸ کاراکتر است')
-                return render(request, 'signup.html', {'alertType': "danger"})
-            tempcode = token_hex(24)
-            TempSignupCode.objects.create(
-                code = tempcode,
-                username = username,
-                email = email,
-                password = password
-            )
-            send_verification_email(email, tempcode, request.build_absolute_uri())
-            return render(request, 'mailSended.html')
+            messages.add_message(request, messages.WARNING, 'نام کاربری نباید دارای فاصله باشد')
+            return render(request, 'signup.html', {'alertType': "danger"})
+        return JsonResponse({"Status": "ERR_ARGS"})
 
 @method_decorator(csrf_exempt, name="dispatch")
 class deleteUserView(View):
@@ -183,5 +190,10 @@ def send_verification_email(email, code, absolute_uri):
 def validateEmail(email):
     regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     if re.fullmatch(regex, email):
+        return True
+    return False
+
+def validateUsername(username):
+    if " " not in username:
         return True
     return False
